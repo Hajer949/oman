@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<title>تسجيل البيانات الببليوغرافية مع بحث وتصدير</title>
+<style>
+  body { font-family: 'Cairo', Arial, sans-serif; background:#f8f9fa; padding:30px; }
+  .container { background:white; padding:30px; border-radius:16px; box-shadow:0 4px 16px rgba(0,0,0,0.08); max-width:1100px; margin:auto; }
+  h2 { text-align:center; color:#30748e; margin-bottom:24px;}
+  label { font-weight:bold; margin-top:12px; display:block; }
+  input, textarea, select { width:100%; padding:9px; margin:7px 0 15px 0; border:1px solid #d3d3d3; border-radius:6px; font-size:15px; }
+  .search-row { display:flex; gap:6px; align-items: center;}
+  .search-row input { flex:1; }
+  .search-btn { padding:8px 10px; background:#267e75; color:white; border:none; border-radius:6px; font-size:13px; cursor:pointer; }
+  .search-btn:hover { background:#3ab09e; }
+  .export-btn { margin: 18px 0; background: #f7b731; color:#fff; }
+  button { padding:10px 24px; background:#3ab09e; color:white; border:none; border-radius:8px; font-size:16px; cursor:pointer; }
+  button:hover { background:#267e75; }
+  table { width:100%; border-collapse:collapse; margin-top:28px; }
+  th, td { border:1px solid #eee; padding:8px 4px; text-align:right; }
+  th { background:#e7f6f3; color:#30748e; }
+  .edit-btn, .delete-btn { padding:5px 14px; border:none; border-radius:6px; color:#fff; cursor:pointer; }
+  .edit-btn { background:#f7b731; }
+  .delete-btn { background:#eb4d4b; }
+  @media (max-width:750px) { .container { padding:10px; } table, thead, tbody, th, td, tr { font-size:12px; } }
+</style>
+</head>
+<body>
+<div class="container">
+  <h2>تسجيل البيانات الببليوغرافية (مراجعة RDA) مع بحث وتصدير</h2>
+  <form id="bibForm">
+    <label>رقم ISBN</label>
+    <div class="search-row">
+      <input type="text" id="isbn" />
+      <button type="button" class="search-btn" onclick="openISBNsearch()">ISBN</button>
+      <button type="button" class="search-btn" onclick="openWorldCat()">WorldCat</button>
+      <button type="button" class="search-btn" onclick="openLOC()">مكتبة الكونجرس</button>
+      <button type="button" class="search-btn" onclick="openBL()">British Library</button>
+    </div>
+    <label>العنوان</label>
+    <div class="search-row">
+      <input type="text" id="title" />
+      <button type="button" class="search-btn" onclick="openGoogleBooks()">Google Books</button>
+      <button type="button" class="search-btn" onclick="openWorldCatTitle()">WorldCat</button>
+      <button type="button" class="search-btn" onclick="openLOCtitle()">مكتبة الكونجرس</button>
+      <button type="button" class="search-btn" onclick="openBLtitle()">British Library</button>
+      <button type="button" class="search-btn" onclick="openSQU()">مكتبة السلطان قابوس</button>
+      <button type="button" class="search-btn" onclick="openShuaa()">شعاع</button>
+    </div>
+    <label>اسم المؤلف</label>
+    <input type="text" id="author" />
+    <label>بيان المسؤولية</label>
+    <input type="text" id="responsibility" />
+    <label>الطبعة</label>
+    <input type="text" id="edition" />
+    <label>مكان النشر</label>
+    <input type="text" id="pubPlace" />
+    <label>اسم الناشر</label>
+    <input type="text" id="publisher" />
+    <label>سنة النشر</label>
+    <input type="text" id="pubYear" />
+    <label>عدد الصفحات / المجلدات</label>
+    <input type="text" id="pages" />
+    <label>الإيضاحات</label>
+    <input type="text" id="illustrations" />
+    <label>الأبعاد</label>
+    <input type="text" id="dimensions" />
+    <label>المواد المصاحبة</label>
+    <input type="text" id="accompanying" />
+    <label>عنوان السلسلة</label>
+    <input type="text" id="seriesTitle" />
+    <label>رقم السلسلة</label>
+    <input type="text" id="seriesNo" />
+    <label>المدخل الإضافي (شخص/هيئة)</label>
+    <input type="text" id="additionalEntry" />
+    <label>تبصرة اللغة</label>
+    <input type="text" id="languageNote" />
+    <label>تبصرة الأطروحة</label>
+    <input type="text" id="thesisNote" />
+    <label>ملاحظات</label>
+    <textarea id="notes"></textarea>
+    <button type="submit">إضافة السجل</button>
+  </form>
+  <button class="export-btn" onclick="exportTableToCSV('bib-records.csv')">تصدير إلى Excel (CSV)</button>
+  <table id="dataTable">
+    <thead>
+      <tr>
+        <th>ISBN</th>
+        <th>العنوان</th>
+        <th>المؤلف</th>
+        <th>بيان المسؤولية</th>
+        <th>الطبعة</th>
+        <th>مكان النشر</th>
+        <th>الناشر</th>
+        <th>السنة</th>
+        <th>الصفحات</th>
+        <th>الإيضاحات</th>
+        <th>الأبعاد</th>
+        <th>المواد المصاحبة</th>
+        <th>السلسلة</th>
+        <th>رقم السلسلة</th>
+        <th>مدخل إضافي</th>
+        <th>تبصرة اللغة</th>
+        <th>تبصرة الأطروحة</th>
+        <th>ملاحظات</th>
+        <th>تعديل</th>
+        <th>حذف</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</div>
+<script>
+// --- البحث ---
+function openISBNsearch() {
+  let isbn = document.getElementById('isbn').value.trim();
+  if(isbn) window.open('https://isbnsearch.org/isbn/' + isbn, '_blank');
+}
+function openWorldCat() {
+  let isbn = document.getElementById('isbn').value.trim();
+  if(isbn) window.open('https://www.worldcat.org/search?q=' + isbn, '_blank');
+}
+function openGoogleBooks() {
+  let title = document.getElementById('title').value.trim();
+  if(title) window.open('https://www.google.com/search?tbm=bks&q=' + encodeURIComponent(title), '_blank');
+}
+function openLOC() {
+  let isbn = document.getElementById('isbn').value.trim();
+  if(isbn) window.open('https://catalog.loc.gov/vwebv/search?searchArg=' + isbn + '&searchCode=GKEY%5E*&searchType=0', '_blank');
+}
+function openBL() {
+  let isbn = document.getElementById('isbn').value.trim();
+  if(isbn) window.open('https://explore.bl.uk/primo_library/libweb/action/search.do?vid=BLVU1&mode=Basic&tab=local_tab&vl(freeText0)=' + isbn, '_blank');
+}
+function openWorldCatTitle() {
+  let title = document.getElementById('title').value.trim();
+  if(title) window.open('https://www.worldcat.org/search?q=' + encodeURIComponent(title), '_blank');
+}
+function openLOCtitle() {
+  let title = document.getElementById('title').value.trim();
+  if(title) window.open('https://catalog.loc.gov/vwebv/search?searchArg=' + encodeURIComponent(title) + '&searchCode=GKEY%5E*&searchType=0', '_blank');
+}
+function openBLtitle() {
+  let title = document.getElementById('title').value.trim();
+  if(title) window.open('https://explore.bl.uk/primo_library/libweb/action/search.do?vid=BLVU1&mode=Basic&tab=local_tab&vl(freeText0)=' + encodeURIComponent(title), '_blank');
+}
+function openSQU() {
+  let title = document.getElementById('title').value.trim();
+  if(title) {
+    window.open('https://squ.on.worldcat.org/search?queryString=' + encodeURIComponent(title), '_blank');
+  }
+}
+function openShuaa() {
+  let title = document.getElementById('title').value.trim();
+  if(title) {
+    window.open('https://www.shuaa.om/en/search?query=' + encodeURIComponent(title), '_blank');
+  }
+}
+
+// --- التعديل/الإضافة ---
+const form = document.getElementById('bibForm');
+const table = document.getElementById('dataTable').getElementsByTagName('tbody')[0];
+let editRow = null;
+
+form.onsubmit = function(e) {
+  e.preventDefault();
+  const rowData = [
+    form.isbn.value, form.title.value, form.author.value, form.responsibility.value,
+    form.edition.value, form.pubPlace.value, form.publisher.value, form.pubYear.value,
+    form.pages.value, form.illustrations.value, form.dimensions.value, form.accompanying.value,
+    form.seriesTitle.value, form.seriesNo.value, form.additionalEntry.value, form.languageNote.value,
+    form.thesisNote.value, form.notes.value
+  ];
+  if (editRow) {
+    for (let i = 0; i < rowData.length; i++) {
+      editRow.cells[i].textContent = rowData[i];
+    }
+    editRow = null;
+    form.reset();
+    form.querySelector('button[type=submit]').textContent = "إضافة السجل";
+  } else {
+    const row = table.insertRow();
+    for (const cellData of rowData) {
+      row.insertCell().textContent = cellData;
+    }
+    let editBtn = document.createElement('button');
+    editBtn.textContent = 'تعديل';
+    editBtn.className = 'edit-btn';
+    editBtn.onclick = function() {
+      editRow = row;
+      let cells = row.cells;
+      form.isbn.value = cells[0].textContent;
+      form.title.value = cells[1].textContent;
+      form.author.value = cells[2].textContent;
+      form.responsibility.value = cells[3].textContent;
+      form.edition.value = cells[4].textContent;
+      form.pubPlace.value = cells[5].textContent;
+      form.publisher.value = cells[6].textContent;
+      form.pubYear.value = cells[7].textContent;
+      form.pages.value = cells[8].textContent;
+      form.illustrations.value = cells[9].textContent;
+      form.dimensions.value = cells[10].textContent;
+      form.accompanying.value = cells[11].textContent;
+      form.seriesTitle.value = cells[12].textContent;
+      form.seriesNo.value = cells[13].textContent;
+      form.additionalEntry.value = cells[14].textContent;
+      form.languageNote.value = cells[15].textContent;
+      form.thesisNote.value = cells[16].textContent;
+      form.notes.value = cells[17].textContent;
+      form.querySelector('button[type=submit]').textContent = "حفظ التعديل";
+      window.scrollTo(0, 0);
+    };
+    row.insertCell().appendChild(editBtn);
+
+    let deleteBtn = document.createElement('button');
+    deleteBtn.textContent = 'حذف';
+    deleteBtn.className = 'delete-btn';
+    deleteBtn.onclick = function() { table.deleteRow(row.rowIndex-1); };
+    row.insertCell().appendChild(deleteBtn);
+
+    form.reset();
+  }
+};
+
+// --- تصدير ---
+function exportTableToCSV(filename) {
+  var csv = [];
+  var rows = document.querySelectorAll("#dataTable tr");
+  for (var i = 0; i < rows.length; i++) {
+    var row = [], cols = rows[i].querySelectorAll("td, th");
+    for (var j = 0; j < cols.length-2; j++)  // بدون أعمدة التعديل والحذف
+      row.push('"' + cols[j].innerText.replace(/"/g, '""') + '"');
+    csv.push(row.join(","));
+  }
+  // تحميل الملف
+  var csvFile = new Blob([csv.join("\n")], { type: "text/csv" });
+  var downloadLink = document.createElement("a");
+  downloadLink.download = filename;
+  downloadLink.href = window.URL.createObjectURL(csvFile);
+  downloadLink.style.display = "none";
+  document.body.appendChild(downloadLink);
+  downloadLink.click();
+}
+</script>
+</body>
+</html>
